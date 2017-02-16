@@ -1,9 +1,13 @@
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from konfera.models.abstract import KonferaModel
 from konfera.settings import TALK_LANGUAGE, TALK_LANGUAGE_DEFAULT, TALK_DURATION as TALK_DURATION_SETTING
+
+from .track import Track
 
 
 class Talk(KonferaModel):
@@ -23,10 +27,12 @@ class Talk(KonferaModel):
 
     TALK = 'talk'
     WORKSHOP = 'workshop'
+    BREAK = 'break'
 
     TALK_TYPE = (
         (TALK, _('Talk')),
         (WORKSHOP, _('Workshop')),
+        (BREAK, _('Break')),
     )
 
     TALK_DURATION = TALK_DURATION_SETTING
@@ -51,6 +57,9 @@ class Talk(KonferaModel):
     )
     event = models.ForeignKey('Event')
 
+    ordering = models.IntegerField('Ordering number', help_text=_('A number that helps to order talks (ASC).'))
+    track = models.ForeignKey('Track')
+
     def __str__(self):
         return self.title
 
@@ -63,3 +72,9 @@ class Talk(KonferaModel):
             }
 
             raise ValidationError({'primary_speaker': msg, 'secondary_speaker': msg})
+
+        room = self.track.room
+        for track in room.tracks:
+            start = track.start
+            if self.track.start < start and self.track.end + timedelta(minutes=self.duration) < start:
+                raise ValidationError({'duration': _('Tracks in the room overlap.')})
