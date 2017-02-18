@@ -14,6 +14,7 @@ class Talk(KonferaModel):
     CFP = 'cfp'
     DRAFT = 'draft'
     APPROVED = 'approved'
+    PUBLISHED = 'published'
     REJECTED = 'rejected'
     WITHDRAWN = 'withdrawn'
 
@@ -21,6 +22,7 @@ class Talk(KonferaModel):
         (CFP, _('Call For Proposals')),
         (DRAFT, _('Draft')),
         (APPROVED, _('Approved')),
+        (PUBLISHED, _('Published')),
         (REJECTED, _('Rejected')),
         (WITHDRAWN, _('Withdrawn')),
     )

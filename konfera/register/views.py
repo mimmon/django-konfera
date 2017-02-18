@@ -27,17 +27,17 @@ def _register_ticket(request, event, ticket_type):
     template_name = 'register_email'
 
     if ticket_type._get_current_status() != TicketType.ACTIVE:
-        messages.error(request, _('This ticket type is not available'))
+        messages.error(request, _('This ticket type is not available'), extra_tags='danger')
 
         return redirect('event_details', event.slug)
 
     description_required = ticket_type.attendee_type in (TicketType.VOLUNTEER, TicketType.PRESS, TicketType.AID)
-    form = RegistrationForm(request.POST or None, description_required=description_required)
+    form = RegistrationForm(request.POST or None, initial={'type': ticket_type.pk},
+                            description_required=description_required)
 
     if form.is_valid():
         new_ticket = form.save(commit=False)
         new_ticket.status = Ticket.REQUESTED
-        new_ticket.type = ticket_type
         new_ticket.save()
 
         if settings.REGISTER_EMAIL_NOTIFY:
