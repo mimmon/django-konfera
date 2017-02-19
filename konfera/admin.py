@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from konfera.forms import OrderedTicketsInlineFormSet
 from konfera.models import (Receipt, Order, Location, Event, Sponsor, TicketType, DiscountCode, Ticket, Speaker, Talk,
-                            Room, Schedule, Organizer, EmailTemplate)
+                            Room, Organizer, Track, EmailTemplate)
 
 
 class SponsorshipInline(admin.TabularInline):
@@ -99,10 +99,10 @@ admin.site.register(Speaker, SpeakerAdmin)
 
 
 class TalkAdmin(admin.ModelAdmin):
-    list_display = ('title', 'speaker', 'type', 'duration', 'event', 'status',)
-    list_filter = ('type', 'duration', 'status', 'event',)
-    search_fields = ('=title', '=primary_speaker__first_name', '=primary_speaker__last_name', '=event__title')
-    ordering = ('title', 'event')
+    list_display = ('title', 'speaker', 'type', 'duration', 'track', 'status',)
+    list_filter = ('type', 'duration', 'status', 'track',)
+    search_fields = ('=title', '=primary_speaker__first_name', '=primary_speaker__last_name', '=event__title',)
+    ordering = ('title', 'track',)
     readonly_fields = ('date_created', 'date_modified', 'uuid')
     fieldsets = (
         (_('Description'), {
@@ -151,6 +151,48 @@ class TalkAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Talk, TalkAdmin)
+
+
+class TrackAdmin(admin.ModelAdmin):
+    list_display = ('title', 'start', 'room')
+    list_filter = ('room',)
+    ordering = ('room', 'start', 'title')
+    search_fields = ('=title',)
+    readonly_fields = ('end',)
+    fieldsets = (
+        (_('Time'), {
+            'fields': ('start', 'end'),
+        }),
+        (_('Details'), {
+            'fields': ('title', 'room',)
+        }),
+        # (_('Modifications'), {
+        #     'fields': ('date_created', 'date_modified'),
+        #     'classes': ('collapse',),
+        # }),
+    )
+
+
+admin.site.register(Track, TrackAdmin)
+
+
+class RoomAdmin(admin.ModelAdmin):
+    # title = models.CharField(max_length=128)
+    # location = models.ForeignKey('Location', related_name='rooms', blank=True)
+    # capacity = models.IntegerField(blank=Tru
+    list_display = ('title', 'capacity', 'location')
+    # list_filter = ('room',)
+    ordering = ('title', 'location',)
+    search_fields = ('=title',)
+    # readonly_fields = ('end',)
+    fieldsets = (
+        (_('Details'), {
+            'fields': ('title', 'location',)
+        }),
+    )
+
+
+admin.site.register(Room, RoomAdmin)
 
 
 class SponsoredEventsInline(admin.TabularInline):
@@ -372,27 +414,27 @@ class TicketAdmin(admin.ModelAdmin):
 admin.site.register(Ticket, TicketAdmin)
 
 
-class ScheduleAdmin(admin.ModelAdmin):
-    list_display = ('start', 'duration', 'talk', 'room')
-    list_filter = ('talk__event', 'room')
-    ordering = ('start', 'room', 'event')
-    search_fields = ('=description',)
-    readonly_fields = ('date_created', 'date_modified')
-    fieldsets = (
-        (_('Time'), {
-            'fields': ('start', 'duration'),
-        }),
-        (_('Details'), {
-            'fields': ('event', 'talk', 'room', 'description')
-        }),
-        (_('Modifications'), {
-            'fields': ('date_created', 'date_modified'),
-            'classes': ('collapse',),
-        }),
-    )
-
-
-admin.site.register(Schedule, ScheduleAdmin)
+# class ScheduleAdmin(admin.ModelAdmin):
+#     list_display = ('start', 'duration', 'talk', 'room')
+#     list_filter = ('talk__event', 'room')
+#     ordering = ('start', 'room', 'event')
+#     search_fields = ('=description',)
+#     readonly_fields = ('date_created', 'date_modified')
+#     fieldsets = (
+#         (_('Time'), {
+#             'fields': ('start', 'duration'),
+#         }),
+#         (_('Details'), {
+#             'fields': ('event', 'talk', 'room', 'description')
+#         }),
+#         (_('Modifications'), {
+#             'fields': ('date_created', 'date_modified'),
+#             'classes': ('collapse',),
+#         }),
+#     )
+#
+#
+# admin.site.register(Schedule, ScheduleAdmin)
 
 
 class OrganizerAdmin(admin.ModelAdmin):

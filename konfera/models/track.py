@@ -10,9 +10,9 @@ from konfera.models.room import Room
 
 
 class Track(KonferaModel):
-    start = models.DateTimeField()
     room = models.ForeignKey('Room', related_name='tracks')
-    title = models.Char(max_length=128)
+    title = models.CharField(max_length=128)
+    start = models.DateTimeField()
     # event = models.ForeignKey('Event', related_name='schedules')
     # description = models.TextField(
     #     blank=True,
@@ -21,7 +21,7 @@ class Track(KonferaModel):
 
     @property
     def end(self):
-        minutes = sum(talk.duration for talk in self.talks)
+        minutes = sum(talk.duration for talk in self.talks.objects.all())
         return self.start + timedelta(minutes=minutes)
 
     def append_talk(self):

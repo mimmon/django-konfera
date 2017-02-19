@@ -188,32 +188,32 @@ class CFPEditView(CFPView):
         return super().dispatch(*args, **kwargs)
 
 
-def schedule_redirect(request, slug):
-    return redirect('schedule', slug=slug, day=0)
-
-
-class ScheduleView(DetailView):
-    model = Event
-    template_name = 'konfera/event/schedule.html'
-
-    def get_context_data(self, **kwargs):
-        event = kwargs['object']
-
-        context = super().get_context_data()
-        context['day'] = int(self.kwargs['day'])
-
-        date = event.date_from + timedelta(days=context['day'])
-        context['schedule'] = event.schedules.filter(start__date=date.date()).order_by('room', 'start')
-
-        event_duration = event.date_to - event.date_from
-        context['interval'] = [
-            {'day': day, 'date': event.date_from + timedelta(days=day)}
-            for day in range(event_duration.days + 1)
-        ]
-
-        update_event_context(event, context)
-
-        return context
+# def schedule_redirect(request, slug):
+#     return redirect('schedule', slug=slug, day=0)
+#
+#
+# class ScheduleView(DetailView):
+#     model = Event
+#     template_name = 'konfera/event/schedule.html'
+#
+#     def get_context_data(self, **kwargs):
+#         event = kwargs['object']
+#
+#         context = super().get_context_data()
+#         context['day'] = int(self.kwargs['day'])
+#
+#         date = event.date_from + timedelta(days=context['day'])
+#         context['schedule'] = event.schedules.filter(start__date=date.date()).order_by('room', 'start')
+#
+#         event_duration = event.date_to - event.date_from
+#         context['interval'] = [
+#             {'day': day, 'date': event.date_from + timedelta(days=day)}
+#             for day in range(event_duration.days + 1)
+#         ]
+#
+#         update_event_context(event, context)
+#
+#         return context
 
 
 def event_public_tickets(request, slug):

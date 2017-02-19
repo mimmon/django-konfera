@@ -5,7 +5,7 @@ from konfera.models.abstract import KonferaModel
 
 class Room(KonferaModel):
     title = models.CharField(max_length=128)
-    location = models.ForeignKey('Location', related_name='rooms')
+    location = models.ForeignKey('Location', related_name='rooms', blank=True)
     capacity = models.IntegerField(blank=True, null=True)
 
     def __str__(self):

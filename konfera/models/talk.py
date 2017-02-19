@@ -10,6 +10,8 @@ from konfera.settings import TALK_LANGUAGE, TALK_LANGUAGE_DEFAULT, TALK_DURATION
 from .track import Track
 
 
+DEFAULT_INCREMENT = 10
+
 class Talk(KonferaModel):
     CFP = 'cfp'
     DRAFT = 'draft'
@@ -39,6 +41,9 @@ class Talk(KonferaModel):
 
     TALK_DURATION = TALK_DURATION_SETTING
 
+    def get_default_ordering(self):
+        return max(t.order_number for t in self.track.talks.objects.all()) + DEFAULT_INCREMENT
+
     title = models.CharField(max_length=256)
     abstract = models.TextField(help_text=_('Abstract will be published in the schedule.'))
     type = models.CharField(choices=TALK_TYPE, max_length=32, default=TALK)
@@ -57,13 +62,22 @@ class Talk(KonferaModel):
         blank=True,
         null=True,
     )
-    event = models.ForeignKey('Event')
+    # event = models.ForeignKey('Event')
+    room = models.ForeignKey('Room')
+    order_number = models.IntegerField('Ordering number', help_text=_('A number that helps to order talks (ASC).'),
+                                       null=True, db_column='ordering')
+    track = models.ForeignKey('Track', related_name='talks')
 
-    ordering = models.IntegerField('Ordering number', help_text=_('A number that helps to order talks (ASC).'))
-    track = models.ForeignKey('Track')
+    def __init__(self, *args):
+        super(Talk, self).__init__(*args)
+        self.order_number = self.get_default_ordering()
 
     def __str__(self):
         return self.title
+
+    @property
+    def room(self):
+        return self.track.room
 
     def clean(self):
         if hasattr(self, 'primary_speaker') and hasattr(self, 'secondary_speaker') \
@@ -76,7 +90,9 @@ class Talk(KonferaModel):
             raise ValidationError({'primary_speaker': msg, 'secondary_speaker': msg})
 
         room = self.track.room
-        for track in room.tracks:
-            start = track.start
-            if self.track.start < start and self.track.end + timedelta(minutes=self.duration) < start:
+        track_start = self.track.start
+        track_end = self.track.start + timedelta(minutes=sum(t.duration for t in self.track.talks))
+        for track in filter(lambda x: x!= self.track, room.tracks):
+            if (track_start < track.start and track_end < track.end) or\
+                (track_start < track.start and track_end < track.end):
                 raise ValidationError({'duration': _('Tracks in the room overlap.')})

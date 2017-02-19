@@ -7,8 +7,9 @@ from .event import Event
 from .sponsor import Sponsor
 from .speaker import Speaker
 from .talk import Talk
+from .track import Track
 from .ticket_type import TicketType
 from .ticket import Ticket
-from .schedule import Schedule
+# from .schedule import Schedule
 from .organizer import Organizer
 from .email_template import EmailTemplate
